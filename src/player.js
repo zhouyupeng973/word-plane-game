@@ -4,13 +4,31 @@ export class Player {
     this.canvas = canvas;
     this.keyboard = keyboard;
     this.width = 60;
-    this.height = 70;
+    this.height = 60;
     this.x = canvas.width / 2 - this.width / 2;
     this.y = canvas.height - this.height - 30; // 初始值，updatePosition 会修正
     this.speed = 8;
     this.color = '#4FC3F7';
     this.invincible = 0; // 无敌帧计时器
     this.updatePosition();
+
+    // 加载飞机图片
+    this.image = null;
+    this._loadImage();
+  }
+
+  _loadImage() {
+    try {
+      if (typeof tt !== 'undefined' && tt.createImage) {
+        const img = tt.createImage();
+        img.onload = () => { this.image = img; };
+        img.src = 'images/player_plane.png';
+      } else if (typeof Image !== 'undefined') {
+        const img = new Image();
+        img.onload = () => { this.image = img; };
+        img.src = 'images/player_plane.png';
+      }
+    } catch (e) {}
   }
 
   // 根据 keyboard 顶部位置，将飞机放到键盘正上方
@@ -40,6 +58,14 @@ export class Player {
     if (this.invincible > 0 && Math.floor(this.invincible / 4) % 2 === 0) {
       return; // 跳过本帧绘制，形成闪烁效果
     }
+
+    // 优先用图片精灵
+    if (this.image) {
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+      return;
+    }
+
+    // 回退：矢量绘制
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
 

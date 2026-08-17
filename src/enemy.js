@@ -31,6 +31,24 @@ export class Enemy {
     
     // 字母击中状态
     this.hit = false;
+
+    // 加载敌机图片
+    this.image = null;
+    this._loadImage();
+  }
+
+  _loadImage() {
+    try {
+      if (typeof tt !== 'undefined' && tt.createImage) {
+        const img = tt.createImage();
+        img.onload = () => { this.image = img; };
+        img.src = 'images/enemy_plane.png';
+      } else if (typeof Image !== 'undefined') {
+        const img = new Image();
+        img.onload = () => { this.image = img; };
+        img.src = 'images/enemy_plane.png';
+      }
+    } catch (e) {}
   }
 
   update() {
@@ -66,6 +84,14 @@ export class Enemy {
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
 
+    // 优先用图片精灵
+    if (this.image) {
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+      this.drawWord(ctx);
+      return;
+    }
+
+    // 回退：矢量绘制
     // 敌机机身（倒三角形）
     ctx.fillStyle = this.hit ? '#66BB6A' : this.color;
     ctx.beginPath();
