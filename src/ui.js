@@ -84,7 +84,7 @@ export class UI {
 
   drawHUD(ctx, keyboardTop) {
     // 顶部背景条
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
     ctx.fillRect(0, 0, this.canvas.width, 50);
 
     // 分数
@@ -102,36 +102,44 @@ export class UI {
     ctx.fillStyle = '#F44336';
     ctx.fillText(heartStr, this.canvas.width - 15, 25);
 
-    // 暂停按钮（顶部中间，大号橙色+文字）
-    const pauseBtnW = 72;
-    const pauseBtnH = 36;
+    // 暂停按钮（顶部中间，超出顶栏+阴影+高对比）
+    const pauseBtnW = 80;
+    const pauseBtnH = 44;
     const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 7;
-    // 按钮背景：橙色
-    ctx.fillStyle = '#FF5722';
-    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 18);
+    const pauseBtnY = 3; // 顶部往上偏移，超出黑条
+    // 阴影
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+    // 按钮背景：亮橙色
+    ctx.fillStyle = '#FF6D00';
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 10);
     ctx.fill();
-    // 亮色描边
-    ctx.strokeStyle = '#FFCCBC';
-    ctx.lineWidth = 2;
-    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 18);
+    // 清除阴影
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    // 白色粗描边
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 10);
     ctx.stroke();
     // 暂停图标（粗两根竖线）
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(pauseBtnX + 14, pauseBtnY + 11);
-    ctx.lineTo(pauseBtnX + 14, pauseBtnY + 25);
-    ctx.moveTo(pauseBtnX + 22, pauseBtnY + 11);
-    ctx.lineTo(pauseBtnX + 22, pauseBtnY + 25);
+    ctx.moveTo(pauseBtnX + 16, pauseBtnY + 12);
+    ctx.lineTo(pauseBtnX + 16, pauseBtnY + 32);
+    ctx.moveTo(pauseBtnX + 26, pauseBtnY + 12);
+    ctx.lineTo(pauseBtnX + 26, pauseBtnY + 32);
     ctx.stroke();
     // 文字
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 15px sans-serif';
+    ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('暂停', pauseBtnX + 32, pauseBtnY + pauseBtnH / 2);
+    ctx.fillText('暂停', pauseBtnX + 36, pauseBtnY + pauseBtnH / 2);
 
     // 连击提示
     if (this.showComboTimer > 0 && this.combo >= 3) {
@@ -383,10 +391,10 @@ export class UI {
   // 检查暂停按钮点击（顶部的小暂停按钮）
   checkPauseButtonClick(x, y) {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
-    const pauseBtnW = 72;
-    const pauseBtnH = 36;
+    const pauseBtnW = 80;
+    const pauseBtnH = 44;
     const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 7;
+    const pauseBtnY = 3;
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
