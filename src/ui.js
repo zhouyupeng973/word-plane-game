@@ -74,9 +74,11 @@ export class UI {
       this.drawLevelSelectScreen(ctx);
     } else if (this.state === 'playing') {
       this.drawHUD(ctx, keyboardTop);
+      this.drawPauseButton(ctx); // 暂停按钮在最顶层
     } else if (this.state === 'paused') {
       this.drawHUD(ctx, keyboardTop);
       this.drawPauseScreen(ctx);
+      this.drawPauseButton(ctx); // 暂停时也显示
     } else if (this.state === 'gameover') {
       this.drawGameOver(ctx);
     }
@@ -102,11 +104,31 @@ export class UI {
     ctx.fillStyle = '#F44336';
     ctx.fillText(heartStr, this.canvas.width - 15, 25);
 
-    // 暂停按钮（顶部中间，超出顶栏+阴影+高对比）
+    // 连击提示
+    if (this.showComboTimer > 0 && this.combo >= 3) {
+      this.showComboTimer--;
+      const alpha = this.showComboTimer / 60;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#FF9800';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const bonus = this.getComboBonus();
+      ctx.fillText(this.combo + '连击! x' + bonus, this.canvas.width / 2, 90);
+      ctx.restore();
+    }
+
+    // 暂停按钮在最顶层绘制（见 drawPauseButton）
+  }
+
+  // 独立绘制暂停按钮（保证在最顶层）
+  drawPauseButton(ctx) {
+    if (this.state !== 'playing' && this.state !== 'paused') return;
     const pauseBtnW = 80;
     const pauseBtnH = 44;
     const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 3; // 顶部往上偏移，超出黑条
+    const pauseBtnY = 3;
     // 阴影
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowBlur = 8;
@@ -140,21 +162,6 @@ export class UI {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText('暂停', pauseBtnX + 36, pauseBtnY + pauseBtnH / 2);
-
-    // 连击提示
-    if (this.showComboTimer > 0 && this.combo >= 3) {
-      this.showComboTimer--;
-      const alpha = this.showComboTimer / 60;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = '#FF9800';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const bonus = this.getComboBonus();
-      ctx.fillText(this.combo + '连击! x' + bonus, this.canvas.width / 2, 90);
-      ctx.restore();
-    }
   }
 
   drawPauseScreen(ctx) {
