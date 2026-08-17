@@ -56,11 +56,22 @@ export class UI {
     this.state = 'playing';
   }
 
+  togglePause() {
+    if (this.state === 'playing') {
+      this.state = 'paused';
+    } else if (this.state === 'paused') {
+      this.state = 'playing';
+    }
+  }
+
   draw(ctx, keyboardTop) {
     if (this.state === 'start') {
       this.drawStartScreen(ctx);
     } else if (this.state === 'playing') {
       this.drawHUD(ctx, keyboardTop);
+    } else if (this.state === 'paused') {
+      this.drawHUD(ctx, keyboardTop);
+      this.drawPauseScreen(ctx);
     } else if (this.state === 'gameover') {
       this.drawGameOver(ctx);
     }
@@ -77,6 +88,23 @@ export class UI {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText('分数: ' + this.score, 15, 25);
+
+    // 暂停按钮（中间位置）
+    const pauseBtnX = this.canvas.width / 2 - 22;
+    const pauseBtnY = 10;
+    const pauseBtnSize = 30;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnSize, pauseBtnSize, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // 暂停图标：两根竖线
+    ctx.moveTo(pauseBtnX + 10, pauseBtnY + 9);
+    ctx.lineTo(pauseBtnX + 10, pauseBtnY + 21);
+    ctx.moveTo(pauseBtnX + 20, pauseBtnY + 9);
+    ctx.lineTo(pauseBtnX + 20, pauseBtnY + 21);
+    ctx.stroke();
 
     // 生命值（爱心）
     ctx.textAlign = 'right';
@@ -100,6 +128,49 @@ export class UI {
       ctx.fillText(this.combo + '连击! x' + bonus, this.canvas.width / 2, 90);
       ctx.restore();
     }
+  }
+
+  drawPauseScreen(ctx) {
+    // 半透明遮罩
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 暂停文字
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 44px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('已暂停', this.canvas.width / 2, this.canvas.height * 0.35);
+
+    // 继续按钮
+    const btnX = this.canvas.width / 2 - 100;
+    const btnY = this.canvas.height * 0.5;
+    ctx.fillStyle = '#4CAF50';
+    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#81C784';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('继续游戏', this.canvas.width / 2, btnY + 27);
+
+    // 返回主页按钮
+    const homeBtnY = this.canvas.height * 0.62;
+    ctx.fillStyle = '#607D8B';
+    this.roundRect(ctx, btnX, homeBtnY, 200, 50, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#90A4AE';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, btnX, homeBtnY, 200, 50, 12);
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('返回主页', this.canvas.width / 2, homeBtnY + 25);
   }
 
   drawStartScreen(ctx) {
@@ -132,7 +203,7 @@ export class UI {
       '敌机上方有缺字母的单词',
       '点击底部对应字母发射子弹',
       '字母正确才能击毁敌机！',
-      '敌机到底会扣生命'
+      '飞机碰到敌机会扣生命'
     ];
     instructions.forEach((text, i) => {
       ctx.fillText(text, this.canvas.width / 2, this.canvas.height * 0.38 + i * 28);
@@ -208,6 +279,20 @@ export class UI {
     ctx.fillText('重新开始', this.canvas.width / 2, btnY + 27);
   }
 
+  // 检查暂停按钮点击（顶部的小暂停按钮）
+  checkPauseButtonClick(x, y) {
+    if (this.state !== 'playing' && this.state !== 'paused') return false;
+    const pauseBtnX = this.canvas.width / 2 - 22;
+    const pauseBtnY = 10;
+    const pauseBtnSize = 30;
+    if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnSize &&
+        y >= pauseBtnY && y <= pauseBtnY + pauseBtnSize) {
+      this.togglePause();
+      return true;
+    }
+    return false;
+  }
+
   // 检查按钮点击
   checkButtonClick(x, y) {
     if (this.state === 'start') {
@@ -215,6 +300,24 @@ export class UI {
       const btnY = this.canvas.height * 0.72;
       if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 55) {
         this.startGame();
+        return true;
+      }
+    } else if (this.state === 'paused') {
+      const btnX = this.canvas.width / 2 - 100;
+      // 继续游戏按钮
+      const continueBtnY = this.canvas.height * 0.5;
+      if (x >= btnX && x <= btnX + 200 && y >= continueBtnY && y <= continueBtnY + 55) {
+        this.togglePause();
+        return true;
+      }
+      // 返回主页按钮
+      const homeBtnY = this.canvas.height * 0.62;
+      if (x >= btnX && x <= btnX + 200 && y >= homeBtnY && y <= homeBtnY + 50) {
+        this.score = 0;
+        this.lives = 5;
+        this.combo = 0;
+        this.showComboTimer = 0;
+        this.state = 'start';
         return true;
       }
     } else if (this.state === 'gameover') {

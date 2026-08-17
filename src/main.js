@@ -122,7 +122,7 @@ function spawnEnemy() {
 
 // 键盘按键处理
 keyboard.onKeyPress = (letter) => {
-  if (ui.state !== 'playing') return;
+  if (ui.state !== 'playing') return; // 暂停/结束时不发射
 
   // 找到屏幕上最低（最接近玩家）且字母匹配的敌机
   let targetEnemy = null;
@@ -156,9 +156,15 @@ function resetGameObjects() {
 
 // 触摸处理
 input.onTouchStart = (x, y, onKeyboard) => {
-  // 检查按钮点击（开始/重新开始）
+  // 优先检查顶部暂停按钮
+  if (ui.checkPauseButtonClick(x, y)) {
+    input.touchX = null;
+    return;
+  }
+  // 检查按钮点击（开始/重新开始/暂停界面按钮）
   if (ui.checkButtonClick(x, y)) {
     resetGameObjects();
+    input.touchX = null;
     return;
   }
 
@@ -251,6 +257,23 @@ function loop() {
       }
     }
 
+    // 玩家飞机与敌机碰撞检测
+    for (const enemy of enemies) {
+      if (enemy.destroyed) continue;
+      // AABB 碰撞检测
+      if (player.x < enemy.x + enemy.width &&
+          player.x + player.width > enemy.x &&
+          player.y < enemy.y + enemy.height &&
+          player.y + player.height > enemy.y) {
+        // 碰撞：敌机爆炸，玩家扣命
+        enemy.destroyed = true;
+        createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
+        createExplosion(player.x + player.width / 2, player.y + player.height / 2, 'rgb(79, 195, 247)');
+        ui.loseLife();
+        break;
+      }
+    }
+
     // 更新粒子
     for (const p of particles) p.update();
     particles = particles.filter(p => p.life > 0);
@@ -261,12 +284,12 @@ function loop() {
   for (const enemy of enemies) enemy.draw(ctx);
   // 子弹
   for (const bullet of bullets) bullet.draw(ctx);
-  // 玩家（仅在游戏中绘制）
-  if (ui.state === 'playing') player.draw(ctx);
+  // 玩家（在游戏中和暂停时绘制）
+  if (ui.state === 'playing' || ui.state === 'paused') player.draw(ctx);
   // 粒子
   for (const p of particles) p.draw(ctx);
-  // 键盘
-  if (ui.state === 'playing') keyboard.draw(ctx);
+  // 键盘（在游戏中和暂停时绘制）
+  if (ui.state === 'playing' || ui.state === 'paused') keyboard.draw(ctx);
   // UI层（最上面）
   ui.draw(ctx, keyboard.getTopY());
 
