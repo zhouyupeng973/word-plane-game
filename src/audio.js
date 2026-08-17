@@ -45,13 +45,14 @@ export class SoundManager {
         const snd = tt.createInnerAudioContext();
         snd.src = info.src;
         snd.volume = info.volume;
+        snd.onError(() => { try { snd.destroy(); } catch (e) {} });
         snd.onEnded(() => { try { snd.destroy(); } catch (e) {} });
         snd.play();
       } else if (info.audio) {
-        // 浏览器：克隆节点并发播放
-        const clone = info.audio.cloneNode();
-        clone.volume = info.volume;
-        clone.play().catch(() => {});
+        // 浏览器：新建 Audio 实例并发播放（cloneNode 可能丢失 src）
+        const snd = new Audio(info.src);
+        snd.volume = info.volume;
+        snd.play().catch(() => {});
       }
     } catch (e) {}
   }
@@ -66,12 +67,14 @@ export class SoundManager {
         audio.src = src;
         audio.volume = volume;
         audio.loop = true;
+        audio.onError(() => {});
         this.bgm = { audio, src, volume };
       } else if (typeof Audio !== 'undefined') {
         const audio = new Audio(src);
         audio.volume = volume;
         audio.loop = true;
         audio.preload = 'auto';
+        audio.addEventListener('error', () => {});
         this.bgm = { audio, src, volume };
       }
     } catch (e) {
@@ -83,7 +86,9 @@ export class SoundManager {
   playBgm() {
     if (!this.bgmEnabled || !this.bgm) return;
     try {
-      this.bgm.audio.play();
+      const p = this.bgm.audio.play();
+      // 浏览器环境 play() 返回 Promise，捕获可能的拒绝
+      if (p && p.catch) p.catch(() => {});
     } catch (e) {}
   }
 
