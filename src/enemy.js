@@ -11,9 +11,9 @@ export class Enemy {
     this.x = Math.random() * (canvas.width - this.width);
     this.y = -this.height;
     
-    // 速度随难度增加
-    this.baseSpeed = 1 + difficulty * 0.3;
-    this.speed = this.baseSpeed + Math.random() * 0.5;
+    // 速度随难度增加（降低初始速度和增长）
+    this.baseSpeed = 0.6 + difficulty * 0.2;
+    this.speed = this.baseSpeed + Math.random() * 0.3;
     
     this.color = '#EF5350';
     this.destroyed = false;

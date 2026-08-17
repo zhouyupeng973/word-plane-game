@@ -52,7 +52,8 @@ export class UI {
     this.score = 0;
     this.lives = 5;
     this.combo = 0;
-    this.state = 'start';
+    this.showComboTimer = 0;
+    this.state = 'playing';
   }
 
   draw(ctx, keyboardTop) {

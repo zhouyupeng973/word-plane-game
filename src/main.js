@@ -144,10 +144,23 @@ keyboard.onKeyPress = (letter) => {
   bullets.push(bullet);
 };
 
+// 重置游戏对象（开始/重新开始时调用）
+function resetGameObjects() {
+  enemies = [];
+  bullets = [];
+  particles = [];
+  frameCount = 0;
+  enemySpawnTimer = 0;
+  difficulty = 1;
+}
+
 // 触摸处理
 input.onTouchStart = (x, y, onKeyboard) => {
-  // 检查按钮点击
-  if (ui.checkButtonClick(x, y)) return;
+  // 检查按钮点击（开始/重新开始）
+  if (ui.checkButtonClick(x, y)) {
+    resetGameObjects();
+    return;
+  }
 
   // 如果没按在键盘上，且正在游戏中，控制玩家飞机位置
   if (!onKeyboard && ui.state === 'playing' && y < keyboard.getTopY()) {
@@ -176,9 +189,9 @@ function loop() {
   drawBackground();
 
   if (ui.state === 'playing') {
-    // 更新难度
-    difficulty = 1 + Math.floor(frameCount / 1800); // 每30秒加一级
-    enemySpawnInterval = Math.max(35, 90 - difficulty * 8);
+    // 更新难度（降低增长速度，每60秒加一级）
+    difficulty = 1 + Math.floor(frameCount / 3600);
+    enemySpawnInterval = Math.max(55, 120 - difficulty * 5);
 
     // 更新玩家
     const restrictedInput = {
@@ -204,17 +217,12 @@ function loop() {
     // 更新敌机
     const gameAreaBottom = keyboard.getTopY();
     for (const enemy of enemies) {
-      const shouldRemove = enemy.update();
-      if (shouldRemove && !enemy.destroyed) {
-        // 敌机到底了，扣生命
-        if (enemy.y >= gameAreaBottom) {
-          ui.loseLife();
-        }
-      }
+      enemy.update();
+      // 敌机到底只是消失，不扣命，不结束游戏
     }
     enemies = enemies.filter(e => {
       if (e.destroyed) return e.destroyedAnimation <= 20;
-      return e.y <= canvas.height + 50;
+      return e.y <= gameAreaBottom + 50;
     });
 
     // 子弹 & 敌机碰撞检测
