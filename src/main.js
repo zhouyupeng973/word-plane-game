@@ -30,8 +30,8 @@ if (typeof tt !== 'undefined') {
 const ctx = canvas.getContext('2d');
 
 // 初始化游戏组件
-const player = new Player(canvas);
 const keyboard = new Keyboard(canvas);
+const player = new Player(canvas, keyboard);
 const input = new InputManager();
 const ui = new UI(canvas);
 
@@ -167,6 +167,7 @@ function resetGameObjects() {
   difficulty = 1;
   player.invincible = 0;
   player.x = canvas.width / 2 - player.width / 2;
+  player.updatePosition();
   // 设置当前所选等级
   setLevel(ui.selectedLevel);
 }

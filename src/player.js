@@ -1,14 +1,22 @@
 // 玩家飞机类
 export class Player {
-  constructor(canvas) {
+  constructor(canvas, keyboard) {
     this.canvas = canvas;
+    this.keyboard = keyboard;
     this.width = 60;
     this.height = 70;
     this.x = canvas.width / 2 - this.width / 2;
-    this.y = canvas.height - this.height - 30;
+    this.y = canvas.height - this.height - 30; // 初始值，updatePosition 会修正
     this.speed = 8;
     this.color = '#4FC3F7';
     this.invincible = 0; // 无敌帧计时器
+    this.updatePosition();
+  }
+
+  // 根据 keyboard 顶部位置，将飞机放到键盘正上方
+  updatePosition() {
+    const topY = this.keyboard ? this.keyboard.getTopY() : (this.canvas.height - 30);
+    this.y = topY - this.height - 5;
   }
 
   update(input) {
