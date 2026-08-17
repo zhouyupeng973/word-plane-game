@@ -8,7 +8,6 @@
     "downloadFile": 5000
   },
   "subpackages": [],
-  "workers": "",
   "plugins": {},
   "preloadRule": {},
   "resizable": false,
