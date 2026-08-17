@@ -31,16 +31,41 @@ export function getCurrentLevel() {
   return currentLevel;
 }
 
+// 已击毁的单词集合（本局游戏中不再出现）
+const destroyedWords = new Set();
+
+// 记录已击毁的单词
+export function markWordDestroyed(word) {
+  destroyedWords.add(word);
+}
+
+// 重置已击毁单词记录（重新开始游戏时调用）
+export function resetDestroyedWords() {
+  destroyedWords.clear();
+}
+
 // 获取当前等级配置
 export function getCurrentLevelConfig() {
   return LEVELS[currentLevel] || LEVELS[0];
 }
 
-// 获取随机单词（从当前等级词库中，返回 {word, trans})
+// 获取随机单词（从当前等级词库中，返回 {word, trans}，跳过已击毁的单词）
 export function getRandomWord() {
   const config = getCurrentLevelConfig();
   const words = config.words;
-  const item = words[Math.floor(Math.random() * words.length)];
+  // 如果全部单词都已击毁，清空记录重新开始
+  if (destroyedWords.size >= words.length) {
+    destroyedWords.clear();
+  }
+  // 最多尝试 50 次找一个未击毁的单词
+  let item;
+  for (let i = 0; i < 50; i++) {
+    item = words[Math.floor(Math.random() * words.length)];
+    if (!destroyedWords.has(item.word)) {
+      return item;
+    }
+  }
+  // 兜底：返回最后一个
   return item;
 }
 

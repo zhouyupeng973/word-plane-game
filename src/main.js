@@ -5,7 +5,7 @@ import { Bullet } from './bullet.js';
 import { Keyboard } from './keyboard.js';
 import { InputManager } from './input.js';
 import { UI } from './ui.js';
-import { setLevel } from './words.js';
+import { setLevel, markWordDestroyed, resetDestroyedWords } from './words.js';
 import { setupSounds, soundManager } from './audio.js';
 
 // 创建画布
@@ -83,11 +83,12 @@ function createExplosion(x, y, color) {
   }
 }
 
-// 敌机爆炸：粒子+单词朗读（TTS失败时回退爆炸音）
+// 敌机爆炸：粒子+单词朗读（TTS失败时回退爆炸音）+标记单词已击毁
 function enemyDestroy(enemy) {
   enemy.destroyed = true;
   createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
   soundManager.speakWord(enemy.fullWord);
+  markWordDestroyed(enemy.fullWord); // 本局不再出现该单词
 }
 
 // 背景星星
@@ -170,6 +171,8 @@ function resetGameObjects() {
   player.updatePosition();
   // 设置当前所选等级
   setLevel(ui.selectedLevel);
+  // 清空已击毁单词记录
+  resetDestroyedWords();
 }
 
 // 触摸处理
