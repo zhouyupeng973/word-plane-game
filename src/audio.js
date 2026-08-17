@@ -3,6 +3,9 @@ export class SoundManager {
   constructor() {
     this.sounds = {};
     this.enabled = true;
+    // 背景音乐
+    this.bgm = null;     // { audio, src, volume }
+    this.bgmEnabled = true;
   }
 
   // 注册音效，传入相对路径（如 'audio/explosion.mp3'）
@@ -53,7 +56,63 @@ export class SoundManager {
     } catch (e) {}
   }
 
+  // === 背景音乐 ===
+
+  // 注册背景音乐
+  registerBgm(src, volume = 0.5) {
+    try {
+      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+        const audio = tt.createInnerAudioContext();
+        audio.src = src;
+        audio.volume = volume;
+        audio.loop = true;
+        this.bgm = { audio, src, volume };
+      } else if (typeof Audio !== 'undefined') {
+        const audio = new Audio(src);
+        audio.volume = volume;
+        audio.loop = true;
+        audio.preload = 'auto';
+        this.bgm = { audio, src, volume };
+      }
+    } catch (e) {
+      this.bgm = null;
+    }
+  }
+
+  // 播放背景音乐
+  playBgm() {
+    if (!this.bgmEnabled || !this.bgm) return;
+    try {
+      this.bgm.audio.play();
+    } catch (e) {}
+  }
+
+  // 停止背景音乐
+  stopBgm() {
+    if (!this.bgm) return;
+    try {
+      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+        this.bgm.audio.stop();
+      } else {
+        this.bgm.audio.pause();
+        this.bgm.audio.currentTime = 0;
+      }
+    } catch (e) {}
+  }
+
+  // 暂停背景音乐（恢复时可继续）
+  pauseBgm() {
+    if (!this.bgm) return;
+    try {
+      this.bgm.audio.pause();
+    } catch (e) {}
+  }
+
   setEnabled(v) { this.enabled = v; }
+  setBgmEnabled(v) {
+    this.bgmEnabled = v;
+    if (!v) this.stopBgm();
+  }
 }
 
 // 全局单例
@@ -62,4 +121,5 @@ export const soundManager = new SoundManager();
 // 默认音效注册（调用此方法注册项目内的音效）
 export function setupSounds() {
   soundManager.register('explosion', 'audio/explosion.mp3', 0.8);
+  soundManager.registerBgm('audio/bgm.mp3', 0.4);
 }

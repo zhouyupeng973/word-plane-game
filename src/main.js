@@ -48,6 +48,7 @@ let enemySpawnTimer = 0;
 let enemySpawnInterval = 90; // 帧数
 let difficulty = 1;
 let frameCount = 0;
+let prevBgmState = false; // 上一帧是否在播放状态（用于BGM控制）
 
 // 粒子效果
 class Particle {
@@ -213,6 +214,18 @@ function loop() {
 
   // 清屏 & 绘制背景
   drawBackground();
+
+  // 背景音乐状态控制：playing时播放，paused时暂停，其他状态停止
+  const shouldPlayBgm = ui.state === 'playing';
+  if (shouldPlayBgm !== prevBgmState) {
+    if (shouldPlayBgm) {
+      soundManager.playBgm();
+    } else {
+      if (ui.state === 'paused') soundManager.pauseBgm();
+      else soundManager.stopBgm();
+    }
+    prevBgmState = shouldPlayBgm;
+  }
 
   if (ui.state === 'playing') {
     // 难度随时间平滑增长（每秒约+0.01，约100秒翻倍）
