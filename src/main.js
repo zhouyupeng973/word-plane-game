@@ -83,11 +83,11 @@ function createExplosion(x, y, color) {
   }
 }
 
-// 敌机爆炸：粒子+音效
+// 敌机爆炸：粒子+单词朗读（TTS失败时回退爆炸音）
 function enemyDestroy(enemy) {
   enemy.destroyed = true;
   createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
-  soundManager.play('explosion');
+  soundManager.speakWord(enemy.fullWord);
 }
 
 // 背景星星

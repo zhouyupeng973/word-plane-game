@@ -132,6 +132,40 @@ export class SoundManager {
     this.bgmEnabled = v;
     if (!v) this.stopBgm();
   }
+
+  // 朗读单词（替代爆炸音效）。TTS 不可用时回退到爆炸音效。
+  speakWord(word) {
+    if (!this.enabled) return;
+    if (!word) return;
+    let ttsOk = false;
+    try {
+      if (typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined') {
+        const utter = new SpeechSynthesisUtterance(word);
+        utter.lang = 'en-US';
+        utter.rate = 0.9;
+        utter.pitch = 1;
+        utter.volume = 1;
+        // 若有英语声优先用英语
+        try {
+          const voices = speechSynthesis.getVoices();
+          const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().indexOf('en') === 0);
+          if (enVoice) utter.voice = enVoice;
+        } catch (e) {}
+        utter.onerror = () => {
+          // TTS 失败兜底
+          if (this.enabled) this.play('explosion');
+        };
+        speechSynthesis.cancel(); // 打断当前的，避免排队
+        speechSynthesis.speak(utter);
+        ttsOk = true;
+      }
+    } catch (e) {
+      ttsOk = false;
+    }
+    if (!ttsOk) {
+      this.play('explosion');
+    }
+  }
 }
 
 // 全局单例
