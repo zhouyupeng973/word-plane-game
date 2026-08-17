@@ -15,15 +15,11 @@ export class Enemy {
     this.missingIndex = index;          // 缺失字母的位置
     this.translation = wordData.trans || ''; // 中文释义
     
-    // 根据单词长度决定机型和大小
+    // 根据单词长度决定机型：短单词用小敌机，长单词用轰炸机
     const len = wordStr.length;
     let sizeType;
-    if (len <= 4) {
+    if (len <= 5) {
       sizeType = 'small';   // 小型战斗机
-    } else if (len <= 7) {
-      sizeType = 'medium';  // 中型攻击机
-    } else if (len <= 10) {
-      sizeType = 'large';   // 大型战机
     } else {
       sizeType = 'bomber';  // 轰炸机
     }
@@ -31,8 +27,6 @@ export class Enemy {
     // 各机型尺寸、颜色、速度系数
     const config = {
       small:  { w: 60, h: 50, color: '#EF5350', speedMul: 1.2 },
-      medium: { w: 75, h: 65, color: '#AB47BC', speedMul: 1.0 },
-      large:  { w: 90, h: 80, color: '#FF7043', speedMul: 0.8 },
       bomber: { w: 110, h: 95, color: '#5C6BC0', speedMul: 0.6 }
     };
     const cfg = config[sizeType];
@@ -62,15 +56,16 @@ export class Enemy {
   }
 
   _loadImage() {
+    const src = this.sizeType === 'bomber' ? 'images/bomber_plane.png' : 'images/enemy_plane.png';
     try {
       if (typeof tt !== 'undefined' && tt.createImage) {
         const img = tt.createImage();
         img.onload = () => { this.image = img; };
-        img.src = 'images/enemy_plane.png';
+        img.src = src;
       } else if (typeof Image !== 'undefined') {
         const img = new Image();
         img.onload = () => { this.image = img; };
-        img.src = 'images/enemy_plane.png';
+        img.src = src;
       }
     } catch (e) {}
   }
@@ -127,29 +122,6 @@ export class Enemy {
       ctx.lineTo(this.x, this.y);
       ctx.closePath();
       ctx.fill();
-    } else if (t === 'medium') {
-      // 中型攻击机：梯形机身 + 翼
-      ctx.beginPath();
-      ctx.moveTo(cx, this.y + this.height);
-      ctx.lineTo(this.x + this.width * 0.85, this.y + 10);
-      ctx.lineTo(this.x + this.width * 0.15, this.y + 10);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillRect(this.x - 6, this.y + 20, 12, 20);
-      ctx.fillRect(this.x + this.width - 6, this.y + 20, 12, 20);
-    } else if (t === 'large') {
-      // 大型战机：宽体 + 双翼
-      ctx.beginPath();
-      ctx.moveTo(cx, this.y + this.height);
-      ctx.lineTo(this.x + this.width, this.y + 15);
-      ctx.lineTo(this.x + this.width * 0.75, this.y);
-      ctx.lineTo(this.x + this.width * 0.25, this.y);
-      ctx.lineTo(this.x, this.y + 15);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = this.hit ? '#388E3C' : '#E64A19';
-      ctx.fillRect(this.x - 10, this.y + 25, 14, 25);
-      ctx.fillRect(this.x + this.width - 4, this.y + 25, 14, 25);
     } else {
       // 轰炸机：宽大机身 + 多翼 + 双引擎
       ctx.beginPath();
