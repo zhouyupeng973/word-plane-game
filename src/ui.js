@@ -94,20 +94,20 @@ export class UI {
     ctx.textBaseline = 'middle';
     ctx.fillText('分数: ' + this.score, 15, 25);
 
-    // 生命值（爱心）- 移到分数右边
-    ctx.textAlign = 'left';
+    // 生命值（爱心）- 右上角
+    ctx.textAlign = 'right';
     ctx.font = '18px sans-serif';
     let heartStr = '';
     for (let i = 0; i < this.lives; i++) heartStr += '❤';
     ctx.fillStyle = '#F44336';
-    ctx.fillText(heartStr, 150, 25);
+    ctx.fillText(heartStr, this.canvas.width - 15, 25);
 
-    // 暂停按钮（右上角，大号+橙色+文字）
+    // 暂停按钮（顶部中间，大号橙色+文字）
     const pauseBtnW = 72;
     const pauseBtnH = 36;
-    const pauseBtnX = this.canvas.width - pauseBtnW - 12;
+    const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
     const pauseBtnY = 7;
-    // 按钮背景：橙色渐变感
+    // 按钮背景：橙色
     ctx.fillStyle = '#FF5722';
     this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 18);
     ctx.fill();
@@ -385,7 +385,7 @@ export class UI {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
     const pauseBtnW = 72;
     const pauseBtnH = 36;
-    const pauseBtnX = this.canvas.width - pauseBtnW - 12;
+    const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
     const pauseBtnY = 7;
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {

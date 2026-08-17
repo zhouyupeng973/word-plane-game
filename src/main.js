@@ -168,7 +168,10 @@ input.onTouchStart = (x, y, onKeyboard) => {
   }
   // 检查按钮点击（开始/重新开始/暂停界面按钮）
   if (ui.checkButtonClick(x, y)) {
-    resetGameObjects();
+    // 仅在从非游戏状态进入游戏时重置对象
+    if (ui.state === 'playing') {
+      resetGameObjects();
+    }
     input.touchX = null;
     return;
   }
