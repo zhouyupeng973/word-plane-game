@@ -125,10 +125,10 @@ export class UI {
   // 独立绘制暂停按钮（保证在最顶层）
   drawPauseButton(ctx) {
     if (this.state !== 'playing' && this.state !== 'paused') return;
-    const pauseBtnW = 80;
-    const pauseBtnH = 44;
+    const pauseBtnW = 90;
+    const pauseBtnH = 40;
     const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 3;
+    const pauseBtnY = 55; // 在黑色顶条(50px)下方，完全不重叠
     // 阴影
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowBlur = 8;
@@ -151,10 +151,10 @@ export class UI {
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(pauseBtnX + 16, pauseBtnY + 12);
-    ctx.lineTo(pauseBtnX + 16, pauseBtnY + 32);
-    ctx.moveTo(pauseBtnX + 26, pauseBtnY + 12);
-    ctx.lineTo(pauseBtnX + 26, pauseBtnY + 32);
+    ctx.moveTo(pauseBtnX + 16, pauseBtnY + 10);
+    ctx.lineTo(pauseBtnX + 16, pauseBtnY + 30);
+    ctx.moveTo(pauseBtnX + 26, pauseBtnY + 10);
+    ctx.lineTo(pauseBtnX + 26, pauseBtnY + 30);
     ctx.stroke();
     // 文字
     ctx.fillStyle = '#FFFFFF';
@@ -398,10 +398,10 @@ export class UI {
   // 检查暂停按钮点击（顶部的小暂停按钮）
   checkPauseButtonClick(x, y) {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
-    const pauseBtnW = 80;
-    const pauseBtnH = 44;
+    const pauseBtnW = 90;
+    const pauseBtnH = 40;
     const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 3;
+    const pauseBtnY = 55;
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
