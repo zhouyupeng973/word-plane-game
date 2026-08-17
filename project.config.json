@@ -1,0 +1,19 @@
+{
+  "description": "单词飞机大战 - 抖音小游戏",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": false
+  },
+  "compileType": "game",
+  "libVersion": "latest",
+  "appid": "ttxxxxxxxxxxxxxxxx",
+  "projectname": "word-plane-war",
+  "condition": {}
+}
