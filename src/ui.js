@@ -263,11 +263,26 @@ export class UI {
     ctx.textBaseline = 'middle';
     ctx.fillText('开始游戏', this.canvas.width / 2, btnY + 27);
 
+    // 侧边栏复访按钮（审核必须项）
+    const sidebarBtnX = this.canvas.width / 2 - 80;
+    const sidebarBtnY = this.canvas.height * 0.83;
+    ctx.fillStyle = '#FF6F00';
+    this.roundRect(ctx, sidebarBtnX, sidebarBtnY, 160, 40, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#FFB74D';
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, sidebarBtnX, sidebarBtnY, 160, 40, 10);
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('回到侧边栏', this.canvas.width / 2, sidebarBtnY + 20);
+
     // 最高分
     if (this.highScore > 0) {
       ctx.fillStyle = '#FFD54F';
       ctx.font = '16px sans-serif';
-      ctx.fillText('最高分: ' + this.highScore, this.canvas.width / 2, this.canvas.height * 0.88);
+      ctx.fillText('最高分: ' + this.highScore, this.canvas.width / 2, this.canvas.height * 0.93);
     }
   }
 
@@ -382,21 +397,47 @@ export class UI {
       ctx.fillText('🎉 新纪录!', this.canvas.width / 2, this.canvas.height * 0.52);
     }
 
+    // 看广告复活按钮（激励广告）
+    const rewardBtnX = this.canvas.width / 2 - 100;
+    const rewardBtnY = this.canvas.height * 0.58;
+    ctx.fillStyle = '#4CAF50';
+    this.roundRect(ctx, rewardBtnX, rewardBtnY, 200, 45, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#81C784';
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, rewardBtnX, rewardBtnY, 200, 45, 10);
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('看广告复活', this.canvas.width / 2, rewardBtnY + 22);
+
     // 重新开始按钮
     const btnX = this.canvas.width / 2 - 100;
-    const btnY = this.canvas.height * 0.65;
+    const btnY = this.canvas.height * 0.68;
     ctx.fillStyle = '#2196F3';
-    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    this.roundRect(ctx, btnX, btnY, 200, 50, 12);
     ctx.fill();
     ctx.strokeStyle = '#64B5F6';
     ctx.lineWidth = 3;
-    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    this.roundRect(ctx, btnX, btnY, 200, 50, 12);
     ctx.stroke();
-
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('重新开始', this.canvas.width / 2, btnY + 27);
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('重新开始', this.canvas.width / 2, btnY + 25);
+
+    // 侧边栏复访按钮
+    const sidebarBtnY = this.canvas.height * 0.79;
+    ctx.fillStyle = '#FF6F00';
+    this.roundRect(ctx, btnX, sidebarBtnY, 200, 40, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#FFB74D';
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, btnX, sidebarBtnY, 200, 40, 10);
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('回到侧边栏', this.canvas.width / 2, sidebarBtnY + 20);
   }
 
   drawVictory(ctx) {
@@ -491,6 +532,12 @@ export class UI {
         this.state = 'levelSelect';
         return true;
       }
+      // 侧边栏复访按钮
+      const sidebarBtnX = this.canvas.width / 2 - 80;
+      const sidebarBtnY = this.canvas.height * 0.83;
+      if (x >= sidebarBtnX && x <= sidebarBtnX + 160 && y >= sidebarBtnY && y <= sidebarBtnY + 40) {
+        return 'sidebar';
+      }
     } else if (this.state === 'levelSelect') {
       // 等级选择按钮（2列布局）
       const btnWidth = 140;
@@ -542,10 +589,21 @@ export class UI {
       }
     } else if (this.state === 'gameover') {
       const btnX = this.canvas.width / 2 - 100;
-      const btnY = this.canvas.height * 0.65;
-      if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 55) {
+      // 看广告复活按钮
+      const rewardBtnY = this.canvas.height * 0.58;
+      if (x >= btnX && x <= btnX + 200 && y >= rewardBtnY && y <= rewardBtnY + 45) {
+        return 'reward';
+      }
+      // 重新开始按钮
+      const btnY = this.canvas.height * 0.68;
+      if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 50) {
         this.resetGame();
         return true;
+      }
+      // 侧边栏复访按钮
+      const sidebarBtnY = this.canvas.height * 0.79;
+      if (x >= btnX && x <= btnX + 200 && y >= sidebarBtnY && y <= sidebarBtnY + 40) {
+        return 'sidebar';
       }
     } else if (this.state === 'victory') {
       const btnX = this.canvas.width / 2 - 100;

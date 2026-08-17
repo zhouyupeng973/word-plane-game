@@ -7,6 +7,7 @@ import { InputManager } from './input.js';
 import { UI } from './ui.js';
 import { setLevel, markWordDestroyed, resetDestroyedWords } from './words.js';
 import { setupSounds, soundManager } from './audio.js';
+import { initSDK, showInterstitialAd, navigateToSidebar, showRewardedAd } from './sdk.js';
 
 // 创建画布
 const canvas = typeof tt !== 'undefined' ? tt.createCanvas() : document.createElement('canvas');
@@ -37,6 +38,9 @@ const ui = new UI(canvas);
 
 // 初始化音效
 setupSounds();
+
+// 初始化抖音平台能力（侧边栏复访、广告）
+initSDK();
 
 // 游戏对象列表
 let enemies = [];
@@ -191,7 +195,27 @@ input.onTouchStart = (x, y, onKeyboard) => {
   }
   // 检查按钮点击（开始/重新开始/暂停界面按钮）
   const prevState = ui.state; // 记录点击前的状态
-  if (ui.checkButtonClick(x, y)) {
+  const clickResult = ui.checkButtonClick(x, y);
+  if (clickResult === 'sidebar') {
+    // 侧边栏复访
+    navigateToSidebar();
+    input.touchX = null;
+    return;
+  }
+  if (clickResult === 'reward') {
+    // 看广告复活
+    showRewardedAd((success) => {
+      if (success) {
+        // 复活：恢复2点生命，继续游戏
+        ui.lives = 2;
+        ui.state = 'playing';
+        player.invincible = 120;
+      }
+    });
+    input.touchX = null;
+    return;
+  }
+  if (clickResult) {
     // 仅在从开始/结束/通关界面进入游戏时重置对象，暂停恢复不重置
     if (prevState === 'start' || prevState === 'gameover' || prevState === 'victory') {
       resetGameObjects();
@@ -314,6 +338,10 @@ function loop() {
           enemyDestroy(enemy);
           ui.loseLife();
           player.invincible = 90; // 约1.5秒无敌帧
+          // 生命值归零游戏结束时展示插屏广告
+          if (ui.state === 'gameover') {
+            showInterstitialAd();
+          }
           break;
         }
       }
