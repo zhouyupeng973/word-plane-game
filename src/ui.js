@@ -238,10 +238,10 @@ export class UI {
     ctx.fillStyle = '#E3F2FD';
     ctx.font = '15px sans-serif';
     const instructions = [
-      '敌机上方有缺字母的单词',
+      '敌机上方有缺失字母的单词',
       '点击底部对应字母发射子弹',
-      '字母正确才能击毁敌机！',
-      '飞机碰到敌机会扣生命'
+      '字母正确才能够击毁敌机！',
+      '飞机碰到敌机会扣除生命值'
     ];
     instructions.forEach((text, i) => {
       ctx.fillText(text, this.canvas.width / 2, this.canvas.height * 0.38 + i * 28);
