@@ -197,9 +197,10 @@ function loop() {
   drawBackground();
 
   if (ui.state === 'playing') {
-    // 更新难度（降低增长速度，每60秒加一级）
-    difficulty = 1 + Math.floor(frameCount / 3600);
-    enemySpawnInterval = Math.max(55, 120 - difficulty * 5);
+    // 难度随时间平滑增长（每秒约+0.01，约100秒翻倍）
+    difficulty = 1 + frameCount / 3600;
+    // 生成间隔随时间缓慢缩短，最低45帧
+    enemySpawnInterval = Math.max(45, 120 - frameCount / 180);
 
     // 更新玩家
     const restrictedInput = {
