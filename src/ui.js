@@ -127,8 +127,18 @@ export class UI {
     if (this.state !== 'playing' && this.state !== 'paused') return;
     const pauseBtnW = 72;
     const pauseBtnH = 32;
-    const pauseBtnX = 110;  // 分数右边
-    const pauseBtnY = 9;    // 与分数同高，垂直居中于黑色条
+    const pauseBtnX = 15;
+    // 获取抖音原生胶囊按钮位置，与之同高
+    let pauseBtnY = 9; // 默认值
+    try {
+      if (typeof tt !== 'undefined' && tt.getMenuButtonBoundingClientRect) {
+        const rect = tt.getMenuButtonBoundingClientRect();
+        if (rect && rect.top !== undefined) {
+          // 用原生按钮的top作为暂停按钮的y，保持同高
+          pauseBtnY = rect.top;
+        }
+      }
+    } catch (e) {}
     // 按钮背景：亮橙色
     ctx.fillStyle = '#FF6D00';
     this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 8);
@@ -392,8 +402,15 @@ export class UI {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
     const pauseBtnW = 72;
     const pauseBtnH = 32;
-    const pauseBtnX = 110;
-    const pauseBtnY = 9;
+    const pauseBtnX = 15;
+    // 与原生胶囊按钮同高
+    let pauseBtnY = 9;
+    try {
+      if (typeof tt !== 'undefined' && tt.getMenuButtonBoundingClientRect) {
+        const rect = tt.getMenuButtonBoundingClientRect();
+        if (rect && rect.top !== undefined) pauseBtnY = rect.top;
+      }
+    } catch (e) {}
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
