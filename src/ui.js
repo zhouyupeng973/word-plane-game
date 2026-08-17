@@ -1,13 +1,16 @@
 // UI管理类 - 分数、生命值、开始/结束画面
+import { LEVELS } from './words.js';
+
 export class UI {
   constructor(canvas) {
     this.canvas = canvas;
     this.score = 0;
     this.lives = 5;
-    this.state = 'start'; // start, playing, gameover
+    this.state = 'start'; // start, levelSelect, playing, paused, gameover
     this.highScore = 0;
     this.combo = 0;
     this.showComboTimer = 0;
+    this.selectedLevel = 0; // 选中的等级索引
   }
 
   addScore(points) {
@@ -67,6 +70,8 @@ export class UI {
   draw(ctx, keyboardTop) {
     if (this.state === 'start') {
       this.drawStartScreen(ctx);
+    } else if (this.state === 'levelSelect') {
+      this.drawLevelSelectScreen(ctx);
     } else if (this.state === 'playing') {
       this.drawHUD(ctx, keyboardTop);
     } else if (this.state === 'paused') {
@@ -233,6 +238,88 @@ export class UI {
     }
   }
 
+  // 选级界面
+  drawLevelSelectScreen(ctx) {
+    // 背景渐变
+    const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+    gradient.addColorStop(0, '#1A237E');
+    gradient.addColorStop(1, '#0D47A1');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.drawStars(ctx);
+
+    // 标题
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('选择难度', this.canvas.width / 2, this.canvas.height * 0.12);
+
+    // 等级按钮（2列布局，4行）
+    const btnWidth = 140;
+    const btnHeight = 50;
+    const marginX = 15;
+    const marginY = 12;
+    const startX = (this.canvas.width - (btnWidth * 2 + marginX)) / 2;
+    const startY = this.canvas.height * 0.2;
+
+    for (let i = 0; i < LEVELS.length; i++) {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = startX + col * (btnWidth + marginX);
+      const y = startY + row * (btnHeight + marginY);
+      const level = LEVELS[i];
+      const isSelected = i === this.selectedLevel;
+
+      // 按钮背景
+      ctx.fillStyle = isSelected ? '#FF9800' : '#37474F';
+      this.roundRect(ctx, x, y, btnWidth, btnHeight, 8);
+      ctx.fill();
+      ctx.strokeStyle = isSelected ? '#FFC107' : '#546E7A';
+      ctx.lineWidth = isSelected ? 3 : 2;
+      this.roundRect(ctx, x, y, btnWidth, btnHeight, 8);
+      ctx.stroke();
+
+      // 等级名称
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(level.name, x + btnWidth / 2, y + btnHeight / 2 - 8);
+      // 词数
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = isSelected ? '#FFF3E0' : '#B0BEC5';
+      ctx.fillText(level.desc, x + btnWidth / 2, y + btnHeight / 2 + 10);
+    }
+
+    // 确认开始按钮
+    const startBtnX = this.canvas.width / 2 - 100;
+    const startBtnY = this.canvas.height * 0.85;
+    ctx.fillStyle = '#4CAF50';
+    this.roundRect(ctx, startBtnX, startBtnY, 200, 50, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#81C784';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, startBtnX, startBtnY, 200, 50, 12);
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('开始游戏', this.canvas.width / 2, startBtnY + 25);
+
+    // 返回按钮
+    const backBtnY = this.canvas.height * 0.85 + 55;
+    ctx.fillStyle = '#455A64';
+    this.roundRect(ctx, startBtnX, backBtnY, 200, 38, 10);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('返回', this.canvas.width / 2, backBtnY + 19);
+  }
+
   drawGameOver(ctx) {
     // 半透明遮罩
     ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
@@ -296,10 +383,42 @@ export class UI {
   // 检查按钮点击
   checkButtonClick(x, y) {
     if (this.state === 'start') {
+      // 开始游戏按钮 -> 进入选级界面
       const btnX = this.canvas.width / 2 - 100;
       const btnY = this.canvas.height * 0.72;
       if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 55) {
+        this.state = 'levelSelect';
+        return true;
+      }
+    } else if (this.state === 'levelSelect') {
+      // 等级选择按钮（2列布局）
+      const btnWidth = 140;
+      const btnHeight = 50;
+      const marginX = 15;
+      const marginY = 12;
+      const startX = (this.canvas.width - (btnWidth * 2 + marginX)) / 2;
+      const startY = this.canvas.height * 0.2;
+      for (let i = 0; i < LEVELS.length; i++) {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const bx = startX + col * (btnWidth + marginX);
+        const by = startY + row * (btnHeight + marginY);
+        if (x >= bx && x <= bx + btnWidth && y >= by && y <= by + btnHeight) {
+          this.selectedLevel = i;
+          return true;
+        }
+      }
+      // 确认开始按钮
+      const startBtnX = this.canvas.width / 2 - 100;
+      const startBtnY = this.canvas.height * 0.85;
+      if (x >= startBtnX && x <= startBtnX + 200 && y >= startBtnY && y <= startBtnY + 50) {
         this.startGame();
+        return true;
+      }
+      // 返回按钮
+      const backBtnY = this.canvas.height * 0.85 + 55;
+      if (x >= startBtnX && x <= startBtnX + 200 && y >= backBtnY && y <= backBtnY + 38) {
+        this.state = 'start';
         return true;
       }
     } else if (this.state === 'paused') {

@@ -5,6 +5,7 @@ import { Bullet } from './bullet.js';
 import { Keyboard } from './keyboard.js';
 import { InputManager } from './input.js';
 import { UI } from './ui.js';
+import { setLevel } from './words.js';
 
 // 创建画布
 const canvas = typeof tt !== 'undefined' ? tt.createCanvas() : document.createElement('canvas');
@@ -154,6 +155,8 @@ function resetGameObjects() {
   difficulty = 1;
   player.invincible = 0;
   player.x = canvas.width / 2 - player.width / 2;
+  // 设置当前所选等级
+  setLevel(ui.selectedLevel);
 }
 
 // 触摸处理
