@@ -50,12 +50,13 @@ export function getCurrentLevelConfig() {
 }
 
 // 获取随机单词（从当前等级词库中，返回 {word, trans}，跳过已击毁的单词）
+// 如果全部击毁则返回 null（表示通关）
 export function getRandomWord() {
   const config = getCurrentLevelConfig();
   const words = config.words;
-  // 如果全部单词都已击毁，清空记录重新开始
+  // 全部击毁，返回 null 表示通关
   if (destroyedWords.size >= words.length) {
-    destroyedWords.clear();
+    return null;
   }
   // 最多尝试 50 次找一个未击毁的单词
   let item;
@@ -65,8 +66,11 @@ export function getRandomWord() {
       return item;
     }
   }
-  // 兜底：返回最后一个
-  return item;
+  // 兜底：遍历找一个未击毁的
+  for (const w of words) {
+    if (!destroyedWords.has(w.word)) return w;
+  }
+  return null; // 全部击毁
 }
 
 // 从单词中随机删除一个字母，返回新单词和被删除的字母

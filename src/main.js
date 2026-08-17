@@ -131,7 +131,14 @@ function drawBackground() {
 
 // 生成敌机
 function spawnEnemy() {
-  enemies.push(new Enemy(canvas, difficulty));
+  const enemy = new Enemy(canvas, difficulty);
+  if (enemy.fullWord === null) {
+    // 通关
+    ui.state = 'victory';
+    soundManager.stopBgm();
+    return;
+  }
+  enemies.push(enemy);
 }
 
 // 键盘按键处理
@@ -185,8 +192,8 @@ input.onTouchStart = (x, y, onKeyboard) => {
   // 检查按钮点击（开始/重新开始/暂停界面按钮）
   const prevState = ui.state; // 记录点击前的状态
   if (ui.checkButtonClick(x, y)) {
-    // 仅在从开始/结束界面进入游戏时重置对象，暂停恢复不重置
-    if (prevState === 'start' || prevState === 'gameover') {
+    // 仅在从开始/结束/通关界面进入游戏时重置对象，暂停恢复不重置
+    if (prevState === 'start' || prevState === 'gameover' || prevState === 'victory') {
       resetGameObjects();
     }
     input.touchX = null;

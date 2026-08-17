@@ -81,6 +81,8 @@ export class UI {
       this.drawPauseButton(ctx); // 暂停时也显示
     } else if (this.state === 'gameover') {
       this.drawGameOver(ctx);
+    } else if (this.state === 'victory') {
+      this.drawVictory(ctx);
     }
   }
 
@@ -397,6 +399,66 @@ export class UI {
     ctx.fillText('重新开始', this.canvas.width / 2, btnY + 27);
   }
 
+  drawVictory(ctx) {
+    // 半透明遮罩
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 通关文字
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 44px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🎉 通关成功! 🎉', this.canvas.width / 2, this.canvas.height * 0.22);
+
+    // 分数
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.fillText('得分: ' + this.score, this.canvas.width / 2, this.canvas.height * 0.37);
+
+    // 最高分
+    ctx.fillStyle = '#FFD54F';
+    ctx.font = '20px sans-serif';
+    ctx.fillText('最高分: ' + this.highScore, this.canvas.width / 2, this.canvas.height * 0.43);
+
+    // 新纪录
+    if (this.score >= this.highScore && this.score > 0) {
+      ctx.fillStyle = '#FF9800';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('🎉 新纪录!', this.canvas.width / 2, this.canvas.height * 0.49);
+    }
+
+    // 重新开始按钮
+    const btnX = this.canvas.width / 2 - 100;
+    const btnY = this.canvas.height * 0.6;
+    ctx.fillStyle = '#4CAF50';
+    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#81C784';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, btnX, btnY, 200, 55, 12);
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('再来一局', this.canvas.width / 2, btnY + 27);
+
+    // 返回主页按钮
+    const homeBtnY = this.canvas.height * 0.72;
+    ctx.fillStyle = '#2196F3';
+    this.roundRect(ctx, btnX, homeBtnY, 200, 50, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#64B5F6';
+    ctx.lineWidth = 3;
+    this.roundRect(ctx, btnX, homeBtnY, 200, 50, 12);
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('返回主页', this.canvas.width / 2, homeBtnY + 25);
+  }
+
   // 检查暂停按钮点击（顶部的小暂停按钮）
   checkPauseButtonClick(x, y) {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
@@ -483,6 +545,24 @@ export class UI {
       const btnY = this.canvas.height * 0.65;
       if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 55) {
         this.resetGame();
+        return true;
+      }
+    } else if (this.state === 'victory') {
+      const btnX = this.canvas.width / 2 - 100;
+      // 再来一局按钮
+      const btnY = this.canvas.height * 0.6;
+      if (x >= btnX && x <= btnX + 200 && y >= btnY && y <= btnY + 55) {
+        this.resetGame();
+        return true;
+      }
+      // 返回主页按钮
+      const homeBtnY = this.canvas.height * 0.72;
+      if (x >= btnX && x <= btnX + 200 && y >= homeBtnY && y <= homeBtnY + 50) {
+        this.score = 0;
+        this.lives = 5;
+        this.combo = 0;
+        this.showComboTimer = 0;
+        this.state = 'start';
         return true;
       }
     }

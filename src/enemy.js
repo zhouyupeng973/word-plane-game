@@ -5,8 +5,29 @@ export class Enemy {
   constructor(canvas, difficulty = 1) {
     this.canvas = canvas;
     
-    // 生成单词（返回 {word, trans} 对象）
+    // 生成单词（返回 {word, trans} 对象，全部击毁时返回 null）
     const wordData = getRandomWord();
+    if (!wordData) {
+      // 通关：标记此敌机为空，不显示
+      this.fullWord = null;
+      this.displayWord = '';
+      this.missingLetter = '';
+      this.missingIndex = -1;
+      this.translation = '';
+      this.destroyed = true; // 直接标记销毁，不生成
+      this.destroyedAnimation = 0;
+      this.width = 60;
+      this.height = 50;
+      this.x = 0;
+      this.y = -100;
+      this.sizeType = 'small';
+      this.color = '#EF5350';
+      this.baseSpeed = 0;
+      this.speed = 0;
+      this.hit = false;
+      this.image = null;
+      return;
+    }
     const wordStr = wordData.word;
     const { word, missing, index } = removeRandomLetter(wordStr);
     this.fullWord = wordStr;           // 完整单词
