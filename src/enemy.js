@@ -19,13 +19,15 @@ export class Enemy {
     this.destroyed = false;
     this.destroyedAnimation = 0;
     
-    // 生成单词
+    // 生成单词（返回 {word, trans} 对象）
     const wordData = getRandomWord();
-    const { word, missing, index } = removeRandomLetter(wordData);
-    this.fullWord = wordData;        // 完整单词
-    this.displayWord = word;         // 显示的单词（缺字母）
-    this.missingLetter = missing;    // 缺失的字母
-    this.missingIndex = index;       // 缺失字母的位置
+    const wordStr = wordData.word;
+    const { word, missing, index } = removeRandomLetter(wordStr);
+    this.fullWord = wordStr;           // 完整单词
+    this.displayWord = word;            // 显示的单词（缺字母）
+    this.missingLetter = missing;       // 缺失的字母
+    this.missingIndex = index;          // 缺失字母的位置
+    this.translation = wordData.trans || ''; // 中文释义
     
     // 字母击中状态
     this.hit = false;
@@ -90,20 +92,33 @@ export class Enemy {
 
   drawWord(ctx) {
     const word = this.displayWord;
-    const fontSize = 18;
-    ctx.font = `bold ${fontSize}px monospace`;
+    const wordFontSize = 18;
+    const transFontSize = 12;
+    const cx = this.x + this.width / 2;
+
+    // 先画中文释义（在单词上方）
+    if (this.translation) {
+      ctx.font = `${transFontSize}px sans-serif`;
+      ctx.fillStyle = '#FFD54F';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(this.translation, cx, this.y - wordFontSize - 10);
+    }
+
+    // 再画英文单词（在释义下方）
+    ctx.font = `bold ${wordFontSize}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
 
     const totalWidth = ctx.measureText(word).width;
-    let startX = this.x + this.width / 2 - totalWidth / 2;
+    let startX = cx - totalWidth / 2;
     const y = this.y - 8;
 
     // 逐个字母绘制
     for (let i = 0; i < word.length; i++) {
       const letter = word[i];
       const letterWidth = ctx.measureText(letter).width;
-      
+
       if (i === this.missingIndex) {
         // 缺失的字母用红色高亮下划线
         ctx.fillStyle = '#FF5722';
@@ -119,7 +134,7 @@ export class Enemy {
         ctx.fillStyle = '#FFFFFF';
         ctx.fillText(letter, startX + letterWidth / 2, y);
       }
-      
+
       startX += letterWidth;
     }
   }

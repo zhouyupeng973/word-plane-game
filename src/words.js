@@ -36,11 +36,12 @@ export function getCurrentLevelConfig() {
   return LEVELS[currentLevel] || LEVELS[0];
 }
 
-// 获取随机单词（从当前等级词库中）
+// 获取随机单词（从当前等级词库中，返回 {word, trans})
 export function getRandomWord() {
   const config = getCurrentLevelConfig();
   const words = config.words;
-  return words[Math.floor(Math.random() * words.length)];
+  const item = words[Math.floor(Math.random() * words.length)];
+  return item;
 }
 
 // 从单词中随机删除一个字母，返回新单词和被删除的字母
