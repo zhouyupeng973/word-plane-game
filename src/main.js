@@ -152,6 +152,8 @@ function resetGameObjects() {
   frameCount = 0;
   enemySpawnTimer = 0;
   difficulty = 1;
+  player.invincible = 0;
+  player.x = canvas.width / 2 - player.width / 2;
 }
 
 // 触摸处理
@@ -257,20 +259,22 @@ function loop() {
       }
     }
 
-    // 玩家飞机与敌机碰撞检测
-    for (const enemy of enemies) {
-      if (enemy.destroyed) continue;
-      // AABB 碰撞检测
-      if (player.x < enemy.x + enemy.width &&
-          player.x + player.width > enemy.x &&
-          player.y < enemy.y + enemy.height &&
-          player.y + player.height > enemy.y) {
-        // 碰撞：敌机爆炸，玩家扣命
-        enemy.destroyed = true;
-        createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
-        createExplosion(player.x + player.width / 2, player.y + player.height / 2, 'rgb(79, 195, 247)');
-        ui.loseLife();
-        break;
+    // 玩家飞机与敌机碰撞检测（无敌时跳过）
+    if (player.invincible <= 0) {
+      for (const enemy of enemies) {
+        if (enemy.destroyed) continue;
+        // AABB 碰撞检测
+        if (player.x < enemy.x + enemy.width &&
+            player.x + player.width > enemy.x &&
+            player.y < enemy.y + enemy.height &&
+            player.y + player.height > enemy.y) {
+          // 碰撞：敌机爆炸，玩家扣1命，获得短暂无敌
+          enemy.destroyed = true;
+          createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
+          ui.loseLife();
+          player.invincible = 90; // 约1.5秒无敌帧
+          break;
+        }
       }
     }
 

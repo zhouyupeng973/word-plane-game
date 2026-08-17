@@ -8,9 +8,12 @@ export class Player {
     this.y = canvas.height - this.height - 30;
     this.speed = 8;
     this.color = '#4FC3F7';
+    this.invincible = 0; // 无敌帧计时器
   }
 
   update(input) {
+    // 无敌帧倒计时
+    if (this.invincible > 0) this.invincible--;
     // 触摸/鼠标移动
     if (input.touchX !== null) {
       this.x = input.touchX - this.width / 2;
@@ -25,6 +28,10 @@ export class Player {
   }
 
   draw(ctx) {
+    // 无敌时闪烁
+    if (this.invincible > 0 && Math.floor(this.invincible / 4) % 2 === 0) {
+      return; // 跳过本帧绘制，形成闪烁效果
+    }
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
 
