@@ -94,30 +94,44 @@ export class UI {
     ctx.textBaseline = 'middle';
     ctx.fillText('分数: ' + this.score, 15, 25);
 
-    // 暂停按钮（中间位置）
-    const pauseBtnX = this.canvas.width / 2 - 22;
-    const pauseBtnY = 10;
-    const pauseBtnSize = 30;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnSize, pauseBtnSize, 6);
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // 暂停图标：两根竖线
-    ctx.moveTo(pauseBtnX + 10, pauseBtnY + 9);
-    ctx.lineTo(pauseBtnX + 10, pauseBtnY + 21);
-    ctx.moveTo(pauseBtnX + 20, pauseBtnY + 9);
-    ctx.lineTo(pauseBtnX + 20, pauseBtnY + 21);
-    ctx.stroke();
-
-    // 生命值（爱心）
-    ctx.textAlign = 'right';
+    // 生命值（爱心）- 移到分数右边
+    ctx.textAlign = 'left';
     ctx.font = '18px sans-serif';
     let heartStr = '';
     for (let i = 0; i < this.lives; i++) heartStr += '❤';
     ctx.fillStyle = '#F44336';
-    ctx.fillText(heartStr, this.canvas.width - 15, 25);
+    ctx.fillText(heartStr, 150, 25);
+
+    // 暂停按钮（右上角，大号+橙色+文字）
+    const pauseBtnW = 72;
+    const pauseBtnH = 36;
+    const pauseBtnX = this.canvas.width - pauseBtnW - 12;
+    const pauseBtnY = 7;
+    // 按钮背景：橙色渐变感
+    ctx.fillStyle = '#FF5722';
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 18);
+    ctx.fill();
+    // 亮色描边
+    ctx.strokeStyle = '#FFCCBC';
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 18);
+    ctx.stroke();
+    // 暂停图标（粗两根竖线）
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(pauseBtnX + 14, pauseBtnY + 11);
+    ctx.lineTo(pauseBtnX + 14, pauseBtnY + 25);
+    ctx.moveTo(pauseBtnX + 22, pauseBtnY + 11);
+    ctx.lineTo(pauseBtnX + 22, pauseBtnY + 25);
+    ctx.stroke();
+    // 文字
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('暂停', pauseBtnX + 32, pauseBtnY + pauseBtnH / 2);
 
     // 连击提示
     if (this.showComboTimer > 0 && this.combo >= 3) {
@@ -369,11 +383,12 @@ export class UI {
   // 检查暂停按钮点击（顶部的小暂停按钮）
   checkPauseButtonClick(x, y) {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
-    const pauseBtnX = this.canvas.width / 2 - 22;
-    const pauseBtnY = 10;
-    const pauseBtnSize = 30;
-    if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnSize &&
-        y >= pauseBtnY && y <= pauseBtnY + pauseBtnSize) {
+    const pauseBtnW = 72;
+    const pauseBtnH = 36;
+    const pauseBtnX = this.canvas.width - pauseBtnW - 12;
+    const pauseBtnY = 7;
+    if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
+        y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
       return true;
     }
