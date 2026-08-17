@@ -4,20 +4,6 @@ import { getRandomWord, removeRandomLetter } from './words.js';
 export class Enemy {
   constructor(canvas, difficulty = 1) {
     this.canvas = canvas;
-    this.width = 70;
-    this.height = 60;
-    
-    // 随机x位置
-    this.x = Math.random() * (canvas.width - this.width);
-    this.y = -this.height;
-    
-    // 速度随难度缓慢增加
-    this.baseSpeed = 0.6 + difficulty * 0.15;
-    this.speed = this.baseSpeed + Math.random() * 0.3;
-    
-    this.color = '#EF5350';
-    this.destroyed = false;
-    this.destroyedAnimation = 0;
     
     // 生成单词（返回 {word, trans} 对象）
     const wordData = getRandomWord();
@@ -28,6 +14,44 @@ export class Enemy {
     this.missingLetter = missing;       // 缺失的字母
     this.missingIndex = index;          // 缺失字母的位置
     this.translation = wordData.trans || ''; // 中文释义
+    
+    // 根据单词长度决定机型和大小
+    const len = wordStr.length;
+    let sizeType;
+    if (len <= 4) {
+      sizeType = 'small';   // 小型战斗机
+    } else if (len <= 7) {
+      sizeType = 'medium';  // 中型攻击机
+    } else if (len <= 10) {
+      sizeType = 'large';   // 大型战机
+    } else {
+      sizeType = 'bomber';  // 轰炸机
+    }
+    
+    // 各机型尺寸、颜色、速度系数
+    const config = {
+      small:  { w: 60, h: 50, color: '#EF5350', speedMul: 1.2 },
+      medium: { w: 75, h: 65, color: '#AB47BC', speedMul: 1.0 },
+      large:  { w: 90, h: 80, color: '#FF7043', speedMul: 0.8 },
+      bomber: { w: 110, h: 95, color: '#5C6BC0', speedMul: 0.6 }
+    };
+    const cfg = config[sizeType];
+    
+    this.width = cfg.w;
+    this.height = cfg.h;
+    this.color = cfg.color;
+    this.sizeType = sizeType;
+    
+    // 随机x位置（确保不超出屏幕）
+    this.x = Math.random() * (canvas.width - this.width);
+    this.y = -this.height;
+    
+    // 速度随难度缓慢增加，大飞机更慢
+    this.baseSpeed = (0.6 + difficulty * 0.15) * cfg.speedMul;
+    this.speed = this.baseSpeed + Math.random() * 0.3;
+    
+    this.destroyed = false;
+    this.destroyedAnimation = 0;
     
     // 字母击中状态
     this.hit = false;
@@ -91,26 +115,64 @@ export class Enemy {
       return;
     }
 
-    // 回退：矢量绘制
-    // 敌机机身（倒三角形）
+    // 回退：矢量绘制（根据机型不同形状）
+    const t = this.sizeType;
     ctx.fillStyle = this.hit ? '#66BB6A' : this.color;
-    ctx.beginPath();
-    ctx.moveTo(cx, this.y + this.height);
-    ctx.lineTo(this.x + this.width, this.y);
-    ctx.lineTo(this.x, this.y);
-    ctx.closePath();
-    ctx.fill();
 
-    // 敌机驾驶舱
+    if (t === 'small') {
+      // 小型战斗机：倒三角
+      ctx.beginPath();
+      ctx.moveTo(cx, this.y + this.height);
+      ctx.lineTo(this.x + this.width, this.y);
+      ctx.lineTo(this.x, this.y);
+      ctx.closePath();
+      ctx.fill();
+    } else if (t === 'medium') {
+      // 中型攻击机：梯形机身 + 翼
+      ctx.beginPath();
+      ctx.moveTo(cx, this.y + this.height);
+      ctx.lineTo(this.x + this.width * 0.85, this.y + 10);
+      ctx.lineTo(this.x + this.width * 0.15, this.y + 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(this.x - 6, this.y + 20, 12, 20);
+      ctx.fillRect(this.x + this.width - 6, this.y + 20, 12, 20);
+    } else if (t === 'large') {
+      // 大型战机：宽体 + 双翼
+      ctx.beginPath();
+      ctx.moveTo(cx, this.y + this.height);
+      ctx.lineTo(this.x + this.width, this.y + 15);
+      ctx.lineTo(this.x + this.width * 0.75, this.y);
+      ctx.lineTo(this.x + this.width * 0.25, this.y);
+      ctx.lineTo(this.x, this.y + 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = this.hit ? '#388E3C' : '#E64A19';
+      ctx.fillRect(this.x - 10, this.y + 25, 14, 25);
+      ctx.fillRect(this.x + this.width - 4, this.y + 25, 14, 25);
+    } else {
+      // 轰炸机：宽大机身 + 多翼 + 双引擎
+      ctx.beginPath();
+      ctx.moveTo(cx, this.y + this.height);
+      ctx.lineTo(this.x + this.width, this.y + 20);
+      ctx.lineTo(this.x + this.width * 0.8, this.y);
+      ctx.lineTo(this.x + this.width * 0.2, this.y);
+      ctx.lineTo(this.x, this.y + 20);
+      ctx.closePath();
+      ctx.fill();
+      // 翼
+      ctx.fillStyle = this.hit ? '#388E3C' : '#3949AB';
+      ctx.fillRect(this.x - 12, this.y + 30, 16, 30);
+      ctx.fillRect(this.x + this.width - 4, this.y + 30, 16, 30);
+      ctx.fillRect(this.x + this.width * 0.3, this.y + 35, 14, 25);
+      ctx.fillRect(this.x + this.width * 0.55, this.y + 35, 14, 25);
+    }
+
+    // 驾驶舱
     ctx.fillStyle = this.hit ? '#A5D6A7' : '#FFCDD2';
     ctx.beginPath();
-    ctx.arc(cx, cy + 5, 8, 0, Math.PI * 2);
+    ctx.arc(cx, cy + 5, t === 'bomber' ? 10 : 8, 0, Math.PI * 2);
     ctx.fill();
-
-    // 机翼
-    ctx.fillStyle = this.hit ? '#388E3C' : '#C62828';
-    ctx.fillRect(this.x - 8, this.y + 15, 10, 25);
-    ctx.fillRect(this.x + this.width - 2, this.y + 15, 10, 25);
 
     // 绘制单词（在敌机上方）
     this.drawWord(ctx);
