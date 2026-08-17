@@ -288,7 +288,7 @@ function loop() {
             enemy.hit = true;
             enemyDestroy(enemy);
             ui.addCombo();
-            const base = 10;
+            const base = enemy.sizeType === 'bomber' ? 20 : 10;
             const bonus = ui.getComboBonus();
             ui.addScore(base * bonus);
           } else {
