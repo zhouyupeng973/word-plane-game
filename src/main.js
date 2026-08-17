@@ -6,6 +6,7 @@ import { Keyboard } from './keyboard.js';
 import { InputManager } from './input.js';
 import { UI } from './ui.js';
 import { setLevel } from './words.js';
+import { setupSounds, soundManager } from './audio.js';
 
 // 创建画布
 const canvas = typeof tt !== 'undefined' ? tt.createCanvas() : document.createElement('canvas');
@@ -33,6 +34,9 @@ const player = new Player(canvas);
 const keyboard = new Keyboard(canvas);
 const input = new InputManager();
 const ui = new UI(canvas);
+
+// 初始化音效
+setupSounds();
 
 // 游戏对象列表
 let enemies = [];
@@ -76,6 +80,13 @@ function createExplosion(x, y, color) {
   for (let i = 0; i < 15; i++) {
     particles.push(new Particle(x, y, color));
   }
+}
+
+// 敌机爆炸：粒子+音效
+function enemyDestroy(enemy) {
+  enemy.destroyed = true;
+  createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
+  soundManager.play('explosion');
 }
 
 // 背景星星
@@ -251,8 +262,7 @@ function loop() {
           // 检查字母是否正确（子弹的字母是点击的字母，已在onKeyPress时选了匹配敌机）
           if (enemy.checkLetterMatch(bullet.letter)) {
             enemy.hit = true;
-            enemy.destroyed = true;
-            createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
+            enemyDestroy(enemy);
             ui.addCombo();
             const base = 10;
             const bonus = ui.getComboBonus();
@@ -277,8 +287,7 @@ function loop() {
             player.y < enemy.y + enemy.height &&
             player.y + player.height > enemy.y) {
           // 碰撞：敌机爆炸，玩家扣1命，获得短暂无敌
-          enemy.destroyed = true;
-          createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'rgb(239, 83, 80)');
+          enemyDestroy(enemy);
           ui.loseLife();
           player.invincible = 90; // 约1.5秒无敌帧
           break;
