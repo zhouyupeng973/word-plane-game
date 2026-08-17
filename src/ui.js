@@ -125,43 +125,35 @@ export class UI {
   // 独立绘制暂停按钮（保证在最顶层）
   drawPauseButton(ctx) {
     if (this.state !== 'playing' && this.state !== 'paused') return;
-    const pauseBtnW = 90;
-    const pauseBtnH = 40;
-    const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 55; // 在黑色顶条(50px)下方，完全不重叠
-    // 阴影
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 3;
+    const pauseBtnW = 72;
+    const pauseBtnH = 32;
+    const pauseBtnX = 120; // 分数右边
+    const pauseBtnY = 9;   // 在黑色条内居中
     // 按钮背景：亮橙色
     ctx.fillStyle = '#FF6D00';
-    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 10);
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 8);
     ctx.fill();
-    // 清除阴影
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-    // 白色粗描边
+    // 白色描边
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 3;
-    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 10);
+    ctx.lineWidth = 2;
+    this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 8);
     ctx.stroke();
     // 暂停图标（粗两根竖线）
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(pauseBtnX + 16, pauseBtnY + 10);
-    ctx.lineTo(pauseBtnX + 16, pauseBtnY + 30);
-    ctx.moveTo(pauseBtnX + 26, pauseBtnY + 10);
-    ctx.lineTo(pauseBtnX + 26, pauseBtnY + 30);
+    ctx.moveTo(pauseBtnX + 12, pauseBtnY + 8);
+    ctx.lineTo(pauseBtnX + 12, pauseBtnY + 24);
+    ctx.moveTo(pauseBtnX + 20, pauseBtnY + 8);
+    ctx.lineTo(pauseBtnX + 20, pauseBtnY + 24);
     ctx.stroke();
     // 文字
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 16px sans-serif';
+    ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('暂停', pauseBtnX + 36, pauseBtnY + pauseBtnH / 2);
+    ctx.fillText('暂停', pauseBtnX + 28, pauseBtnY + pauseBtnH / 2);
   }
 
   drawPauseScreen(ctx) {
@@ -398,10 +390,10 @@ export class UI {
   // 检查暂停按钮点击（顶部的小暂停按钮）
   checkPauseButtonClick(x, y) {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
-    const pauseBtnW = 90;
-    const pauseBtnH = 40;
-    const pauseBtnX = this.canvas.width / 2 - pauseBtnW / 2;
-    const pauseBtnY = 55;
+    const pauseBtnW = 72;
+    const pauseBtnH = 32;
+    const pauseBtnX = 120;
+    const pauseBtnY = 9;
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
