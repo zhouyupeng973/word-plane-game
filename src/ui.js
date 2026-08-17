@@ -127,8 +127,8 @@ export class UI {
     if (this.state !== 'playing' && this.state !== 'paused') return;
     const pauseBtnW = 72;
     const pauseBtnH = 32;
-    const pauseBtnX = 120; // 分数右边
-    const pauseBtnY = 9;   // 在黑色条内居中
+    const pauseBtnX = 15;  // 和分数左对齐
+    const pauseBtnY = 50;  // 黑色条(50px)下方
     // 按钮背景：亮橙色
     ctx.fillStyle = '#FF6D00';
     this.roundRect(ctx, pauseBtnX, pauseBtnY, pauseBtnW, pauseBtnH, 8);
@@ -392,8 +392,8 @@ export class UI {
     if (this.state !== 'playing' && this.state !== 'paused') return false;
     const pauseBtnW = 72;
     const pauseBtnH = 32;
-    const pauseBtnX = 120;
-    const pauseBtnY = 9;
+    const pauseBtnX = 15;
+    const pauseBtnY = 50;
     if (x >= pauseBtnX && x <= pauseBtnX + pauseBtnW &&
         y >= pauseBtnY && y <= pauseBtnY + pauseBtnH) {
       this.togglePause();
