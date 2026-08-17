@@ -6,29 +6,44 @@ export class SoundManager {
     // 背景音乐
     this.bgm = null;     // { audio, src, volume }
     this.bgmEnabled = true;
+    // 检测平台：PC SDK 的 tt.createInnerAudioContext 有路径解析问题，PC 上改用原生 Audio
+    this.useNativeAudio = this._detectPc();
+  }
+
+  _detectPc() {
+    try {
+      if (typeof tt !== 'undefined' && tt.getSystemInfoSync) {
+        const info = tt.getSystemInfoSync();
+        const platform = (info.platform || '').toLowerCase();
+        // PC SDK 环境（windows / mac / pc）
+        if (platform.indexOf('win') >= 0 || platform.indexOf('mac') >= 0 || platform === 'pc') {
+          return true;
+        }
+      }
+    } catch (e) {}
+    // 无 tt 环境也是原生 Audio
+    return typeof tt === 'undefined';
   }
 
   // 注册音效，传入相对路径（如 'audio/explosion.mp3'）
   register(name, src, volume = 1) {
     try {
-      let audio;
-      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
-        // 抖音小游戏环境
-        audio = tt.createInnerAudioContext();
-        audio.src = src;
-        audio.volume = volume;
-        // 预加载
-        try { audio.autoplay = false; } catch (e) {}
-      } else if (typeof Audio !== 'undefined') {
-        // 浏览器环境
-        audio = new Audio(src);
+      if (this.useNativeAudio && typeof Audio !== 'undefined') {
+        // PC/浏览器环境：用原生 Audio 预加载
+        const audio = new Audio(src);
         audio.volume = volume;
         audio.preload = 'auto';
+        this.sounds[name] = { audio, src, volume };
+      } else if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+        // 抖音小游戏移动端环境
+        const audio = tt.createInnerAudioContext();
+        audio.src = src;
+        audio.volume = volume;
+        try { audio.autoplay = false; } catch (e) {}
+        this.sounds[name] = { audio, src, volume };
       } else {
         this.sounds[name] = null;
-        return;
       }
-      this.sounds[name] = { audio, src, volume };
     } catch (e) {
       this.sounds[name] = null;
     }
@@ -40,19 +55,19 @@ export class SoundManager {
     const info = this.sounds[name];
     if (!info) return;
     try {
-      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
-        // 抖音：每次播放用新实例，避免前一次被中断
+      if (this.useNativeAudio && typeof Audio !== 'undefined') {
+        // PC/浏览器：新建 Audio 实例并发播放
+        const snd = new Audio(info.src);
+        snd.volume = info.volume;
+        snd.play().catch(() => {});
+      } else if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+        // 抖音移动端：每次播放用新实例
         const snd = tt.createInnerAudioContext();
         snd.src = info.src;
         snd.volume = info.volume;
         snd.onError(() => { try { snd.destroy(); } catch (e) {} });
         snd.onEnded(() => { try { snd.destroy(); } catch (e) {} });
         snd.play();
-      } else if (info.audio) {
-        // 浏览器：新建 Audio 实例并发播放（cloneNode 可能丢失 src）
-        const snd = new Audio(info.src);
-        snd.volume = info.volume;
-        snd.play().catch(() => {});
       }
     } catch (e) {}
   }
@@ -62,19 +77,19 @@ export class SoundManager {
   // 注册背景音乐
   registerBgm(src, volume = 0.5) {
     try {
-      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
-        const audio = tt.createInnerAudioContext();
-        audio.src = src;
-        audio.volume = volume;
-        audio.loop = true;
-        audio.onError(() => {});
-        this.bgm = { audio, src, volume };
-      } else if (typeof Audio !== 'undefined') {
+      if (this.useNativeAudio && typeof Audio !== 'undefined') {
         const audio = new Audio(src);
         audio.volume = volume;
         audio.loop = true;
         audio.preload = 'auto';
         audio.addEventListener('error', () => {});
+        this.bgm = { audio, src, volume };
+      } else if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+        const audio = tt.createInnerAudioContext();
+        audio.src = src;
+        audio.volume = volume;
+        audio.loop = true;
+        audio.onError(() => {});
         this.bgm = { audio, src, volume };
       }
     } catch (e) {
@@ -87,7 +102,6 @@ export class SoundManager {
     if (!this.bgmEnabled || !this.bgm) return;
     try {
       const p = this.bgm.audio.play();
-      // 浏览器环境 play() 返回 Promise，捕获可能的拒绝
       if (p && p.catch) p.catch(() => {});
     } catch (e) {}
   }
@@ -96,7 +110,7 @@ export class SoundManager {
   stopBgm() {
     if (!this.bgm) return;
     try {
-      if (typeof tt !== 'undefined' && tt.createInnerAudioContext) {
+      if (!this.useNativeAudio && typeof tt !== 'undefined' && tt.createInnerAudioContext) {
         this.bgm.audio.stop();
       } else {
         this.bgm.audio.pause();
