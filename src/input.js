@@ -18,13 +18,9 @@ export class InputManager {
       tt.onKeyDown && tt.onKeyDown((res) => {
         switch (res.key) {
           case 'ArrowLeft':
-          case 'a':
-          case 'A':
             this.left = true;
             break;
           case 'ArrowRight':
-          case 'd':
-          case 'D':
             this.right = true;
             break;
         }
@@ -39,13 +35,9 @@ export class InputManager {
       tt.onKeyUp && tt.onKeyUp((res) => {
         switch (res.key) {
           case 'ArrowLeft':
-          case 'a':
-          case 'A':
             this.left = false;
             break;
           case 'ArrowRight':
-          case 'd':
-          case 'D':
             this.right = false;
             break;
         }
